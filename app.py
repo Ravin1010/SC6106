@@ -75,6 +75,8 @@ def deleteUsers():
     conn.close()
     return "All users deleted"
 
+# MUST RUN ON IMPORT (Render + Gunicorn)
+init_db()
+
 if __name__ == "__main__":
-	init_db()
 	app.run()
