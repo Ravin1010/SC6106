@@ -5,12 +5,25 @@
     <div class="container">
         <h2>Welcome to SC6106 Web3 Application</h2>
         <p>Main</p>
+
         <form action="/transferMoney" method="post">
             <input type="submit" value="Transfer Money">
         </form>
         <form action="/depositMoney" method="post">
             <input type="submit" value="Deposit Money">
         </form>
+
+        <!-- NEW SQL UI BUTTONS -->
+        <form action="/check" method="get">
+            <input type="submit" value="Check Table Structure (SQL)">
+        </form>
+        <form action="/viewUsers" method="get">
+            <input type="submit" value="View Users (SQL)">
+        </form>
+        <form action="/deleteUsers" method="get">
+            <input type="submit" value="Delete Users (SQL)">
+        </form>
+
         <form action="/" method="post">
             <input type="submit" value="Exit">
         </form>

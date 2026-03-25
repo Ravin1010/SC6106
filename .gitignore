@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+
+# Flask runtime
+instance/
+*.log
+
+# SQLite database (runtime generated)
+user.db
+*.sqlite3
+
+# OS files
+.DS_Store
+
+# Codespaces
+.vscode/
