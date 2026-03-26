@@ -10,11 +10,12 @@ def init_db():
     conn.execute('CREATE TABLE IF NOT EXISTS user (name text, timestamp timestamp)')
     conn.close()
 
-# HOME
+# HOME/INDEX
 @app.route("/", methods=["GET", "POST"])
 def index():
 	return(render_template("index.html"))
 
+# MAIN
 @app.route("/main", methods=["GET", "POST"])
 def main():
 	if request.method == "POST":
@@ -30,17 +31,22 @@ def main():
 
 	return(render_template("main.html"))
 
-# TRANSFER PAGE
+# TRANSFER MONEY PAGE
 @app.route("/transferMoney", methods=["GET", "POST"])
 def transferMoney():
 	return(render_template("transferMoney.html"))
 
-# DEPOSIT PAGE
+# DEPOSIT MONEY PAGE
 @app.route("/depositMoney", methods=["GET", "POST"])
 def depositMoney():
 	return(render_template("depositMoney.html"))
 
-# CHECK TABLE STRUCTURE (print description)
+# DATABASE FUNCTIONS PAGE
+@app.route("/databaseFunctions", methods=["GET", "POST"])
+def databaseFunctions():
+	return(render_template("databaseFunctions.html"))
+
+# CHECK (TABLE STRUCTURE (print description))
 @app.route("/check")
 def check():
     conn = sqlite3.connect('user.db')
@@ -51,7 +57,7 @@ def check():
     conn.close()
     return desc
 
-# SELECT + PRINT USERS (PDF loop)
+# VIEW USERS (SELECT + PRINT USERS (PDF loop))
 @app.route("/viewUsers")
 def viewUsers():
     conn = sqlite3.connect('user.db')

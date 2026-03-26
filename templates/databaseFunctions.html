@@ -1,0 +1,22 @@
+<head></head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+<body>
+    <div class="container">
+        <h2>Database Functions</h2>
+        <!-- SQL UI BUTTONS -->
+        <form action="/check" method="get">
+            <input type="submit" value="Check Table Structure (SQL)">
+        </form>
+        <form action="/viewUsers" method="get">
+            <input type="submit" value="View Users (SQL)">
+        </form>
+        <form action="/deleteUsers" method="get">
+            <input type="submit" value="Delete Users (SQL)">
+        </form>
+        <form action="/main" method="post">
+            <input type="submit" value="Main">
+        </form>
+        
+    </div>
+</body>
