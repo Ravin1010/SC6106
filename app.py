@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, jsonify
 import sqlite3
 import datetime
 
@@ -52,10 +52,10 @@ def check():
     conn = sqlite3.connect('user.db')
     c = conn.cursor()
     c.execute('select * from user')
-    desc = str(c.description)
+    desc = c.description
     c.close()
     conn.close()
-    return desc
+    return jsonify({"result": str(desc)})
 
 # VIEW USERS (SELECT + PRINT USERS (PDF loop))
 @app.route("/viewUsers")
@@ -63,12 +63,10 @@ def viewUsers():
     conn = sqlite3.connect('user.db')
     c = conn.cursor()
     c.execute('select * from user')
-    r = ""
-    for row in c:
-        r += str(row) + "<br>"
+    rows = c.fetchall()
     c.close()
     conn.close()
-    return r
+    return jsonify({"result": rows})
 
 # DELETE USERS
 @app.route("/deleteUsers")
@@ -79,7 +77,7 @@ def deleteUsers():
     conn.commit()
     c.close()
     conn.close()
-    return "All users deleted"
+    return jsonify({"result": "All users deleted"})
 
 # MUST RUN ON IMPORT (Render + Gunicorn)
 init_db()

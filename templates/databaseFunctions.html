@@ -5,18 +5,32 @@
     <div class="container">
         <h2>Database Functions</h2>
         <!-- SQL UI BUTTONS -->
-        <form action="/check" method="get">
-            <input type="submit" value="Check Table Structure (SQL)">
-        </form>
-        <form action="/viewUsers" method="get">
-            <input type="submit" value="View Users (SQL)">
-        </form>
-        <form action="/deleteUsers" method="get">
-            <input type="submit" value="Delete Users (SQL)">
-        </form>
+        <button class="btn" onclick="check()">Check Table Structure (SQL)</button>
+        <button class="btn" onclick="viewUsers()">View Users (SQL)</button>
+        <button class="btn" onclick="deleteUsers()">Delete Users (SQL)</button>
+        <p id="sql_result"></p>
         <form action="/main" method="post">
             <input type="submit" value="Main">
         </form>
-        
+        <script src ="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+        <script>
+            async function check(){
+                const response = await fetch("/check");
+                const data = await response.json();
+                document.getElementById("sql_result").innerText = data.result;
+            }
+
+            async function viewUsers(){
+                const response = await fetch("/viewUsers");
+                const data = await response.json();
+                document.getElementById("sql_result").innerText = JSON.stringify(data.result);
+            }
+
+            async function deleteUsers(){
+                const response = await fetch("/deleteUsers");
+                const data = await response.json();
+                document.getElementById("sql_result").innerText = data.result;
+            }
+        </script>        
     </div>
 </body>
