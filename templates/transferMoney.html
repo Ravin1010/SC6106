@@ -6,7 +6,7 @@
         <h2>Transfer Money</h2>
         <input type="text" id="payer" placeholder="Enter Payer Address">
         <input type="text" id="payee" placeholder="Enter Payee Address">
-        <input type="text" id="amount" placeholder="Enter Payer Amount">
+        <input type="text" id="amount" placeholder="Enter Amount (ETH)">
         <button class="btn" onclick="transfer()">Transfer</button>
         <button class="btn" onclick="transaction()">View Transaction</button>
         
@@ -18,34 +18,49 @@
         <p id="view_amount"></p>
         <script src ="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
         <script>
-            const contractAddress = "0xda2Ae0e50F3FcE4F410ab819C47C78560D907aE8";
+            const contractAddress = "0x0e3a7C82510A63887d89d48Fe77b992A0bB4cdC8";
             const contractABI = [
                 {
+                    "anonymous": false,
                     "inputs": [
                         {
+                            "indexed": true,
                             "internalType": "address",
-                            "name": "_payer",
+                            "name": "payer",
                             "type": "address"
                         },
                         {
+                            "indexed": true,
                             "internalType": "address",
-                            "name": "_payee",
+                            "name": "payee",
                             "type": "address"
                         },
                         {
+                            "indexed": false,
                             "internalType": "uint256",
-                            "name": "_amount",
+                            "name": "amount",
                             "type": "uint256"
                         }
                     ],
-                    "name": "weixin",
-                    "outputs": [],
-                    "stateMutability": "payable",
+                    "name": "Payment",
+                    "type": "event"
+                },
+                {
+                    "inputs": [],
+                    "name": "amount",
+                    "outputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
+                    "stateMutability": "view",
                     "type": "function"
                 },
                 {
                     "inputs": [],
-                    "name": "checkTransaction",
+                    "name": "check_transaction",
                     "outputs": [
                         {
                             "internalType": "address",
@@ -65,6 +80,69 @@
                     ],
                     "stateMutability": "view",
                     "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "payee",
+                    "outputs": [
+                        {
+                            "internalType": "address",
+                            "name": "",
+                            "type": "address"
+                        }
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "payer",
+                    "outputs": [
+                        {
+                            "internalType": "address",
+                            "name": "",
+                            "type": "address"
+                        }
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [
+                        {
+                            "internalType": "address",
+                            "name": "",
+                            "type": "address"
+                        }
+                    ],
+                    "name": "sentAmounts",
+                    "outputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [
+                        {
+                            "internalType": "address",
+                            "name": "payer_add",
+                            "type": "address"
+                        },
+                        {
+                            "internalType": "address payable",
+                            "name": "payee_add",
+                            "type": "address"
+                        }
+                    ],
+                    "name": "weixin",
+                    "outputs": [],
+                    "stateMutability": "payable",
+                    "type": "function"
                 }
             ];
 
@@ -74,20 +152,43 @@
         async function transfer(){
             const accounts = await web3.eth.requestAccounts();
 
-            const payer = document.getElementById("payer").value;
+            const payer = accounts[0];
             const payee = document.getElementById("payee").value;
             const amount = document.getElementById("amount").value;
-            console.log(payer, payee, amount);
 
-            await contract.methods.weixin(payer, payee, amount).send({from:accounts[0]});
+            contract.methods.weixin(payer, payee).send({
+                from: payer,
+                value: web3.utils.toWei(amount, "ether")
+            })
+            .once("receipt", function(receipt){
+
+                const event = receipt.events.Payment;
+
+                const payerAddr = event.returnValues.payer;
+                const payeeAddr = event.returnValues.payee;
+                const amt = web3.utils.fromWei(event.returnValues.amount, "ether");
+
+                // Alert with event data
+                alert(
+                    "Payment Event:\n" +
+                    "Payer: " + payerAddr + "\n" +
+                    "Payee: " + payeeAddr + "\n" +
+                    "Amount: " + amt + " ETH"
+                );
+
+            })
+            .on("error", function(error){
+                console.error(error);
+            });
         }
 
         async function transaction(){
-            const result = await contract.methods.checkTransaction().call();
+            const result = await contract.methods.check_transaction().call();
 
             document.getElementById("view_payer").innerText = "Payer is "+ result[0];
             document.getElementById("view_payee").innerText = "Payee is "+ result[1];
-            document.getElementById("view_amount").innerText = "Amount is "+ result[2];
+            const amt = web3.utils.fromWei(result[2], "ether");
+            document.getElementById("view_amount").innerText = "Amount is " + amt + " ETH";
 
         }
         </script>

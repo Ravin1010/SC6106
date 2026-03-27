@@ -5,9 +5,11 @@
     <div class="container">
         <h2>Deposit Money</h2>
         <input type="text" id="customer_input" placeholder="Enter Depositor Address">
-        <input type="text" id="amount_input" placeholder="Enter Amount Input">
+        <input type="text" id="amount_input" placeholder="Enter Amount (ETH)">
+
         <button class="btn" onclick="deposit()">Deposit</button>
         <button class="btn" onclick="transaction()">View Transaction</button>
+        <button class="btn" onclick="withdraw()">Withdraw</button>
         
         <form action="/main" method="post">
             <input type="submit" value="Main">
@@ -16,19 +18,102 @@
         <p id="view_amount_input"></p>
         <script src ="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
         <script>
-            const contractAddress = "0x6a28b9D0AF005b4F283E39Fd3D938AF3aEC7c4d7";
+            const contractAddress = "0x7fCDF7d260255414B10C46E06EefEe4F0d8ADAdF";
             const contractABI = [
+                {
+                    "inputs": [],
+                    "stateMutability": "nonpayable",
+                    "type": "constructor"
+                },
+                {
+                    "anonymous": false,
+                    "inputs": [
+                        {
+                            "indexed": true,
+                            "internalType": "address",
+                            "name": "user",
+                            "type": "address"
+                        },
+                        {
+                            "indexed": false,
+                            "internalType": "uint256",
+                            "name": "amount",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "DepositMade",
+                    "type": "event"
+                },
+                {
+                    "anonymous": false,
+                    "inputs": [
+                        {
+                            "indexed": true,
+                            "internalType": "address",
+                            "name": "owner",
+                            "type": "address"
+                        },
+                        {
+                            "indexed": false,
+                            "internalType": "uint256",
+                            "name": "amount",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "Withdraw",
+                    "type": "event"
+                },
+                {
+                    "inputs": [],
+                    "name": "amount",
+                    "outputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
                 {
                     "inputs": [
                         {
                             "internalType": "address",
-                            "name": "customer_input",
+                            "name": "",
                             "type": "address"
-                        },
+                        }
+                    ],
+                    "name": "balances",
+                    "outputs": [
                         {
                             "internalType": "uint256",
-                            "name": "amount_input",
+                            "name": "",
                             "type": "uint256"
+                        }
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "customer",
+                    "outputs": [
+                        {
+                            "internalType": "address",
+                            "name": "",
+                            "type": "address"
+                        }
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [
+                        {
+                            "internalType": "address",
+                            "name": "customer_add",
+                            "type": "address"
                         }
                     ],
                     "name": "deposit_money",
@@ -53,6 +138,26 @@
                     ],
                     "stateMutability": "view",
                     "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "owner",
+                    "outputs": [
+                        {
+                            "internalType": "address",
+                            "name": "",
+                            "type": "address"
+                        }
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "withdraw",
+                    "outputs": [],
+                    "stateMutability": "nonpayable",
+                    "type": "function"
                 }
             ];
 
@@ -61,19 +166,65 @@
 
         async function deposit(){
             const accounts = await web3.eth.requestAccounts();
-            const customer_input = document.getElementById("customer_input").value;
-            const amount_input = document.getElementById("amount_input").value;
-            console.log(customer_input, amount_input);
 
-            await contract.methods.deposit_money(customer_input, amount_input).send({from:accounts[0]});
+            const customer = accounts[0]; // still enforced by contract
+            const amount = document.getElementById("amount_input").value;
 
+            contract.methods.deposit_money(customer).send({
+                from: customer,
+                value: web3.utils.toWei(amount, "ether")
+            })
+            .once("receipt", function(receipt){
+
+                const event = receipt.events.DepositMade;
+
+                const user = event.returnValues.user;
+                const amt = web3.utils.fromWei(event.returnValues.amount, "ether");
+
+                alert(
+                    "Deposit Event:\n" +
+                    "User: " + user + "\n" +
+                    "Amount: " + amt + " ETH"
+                );
+
+            })
+            .on("error", function(error){
+                console.error(error);
+            });
         }
+
         async function transaction(){
             const result = await contract.methods.deposit_view().call();
 
-            document.getElementById("view_customer_input").innerText = "Depositor address is "+ result[0];
-            document.getElementById("view_amount_input").innerText = "Amount input is "+ result[1];
+            const amt = web3.utils.fromWei(result[1], "ether");
 
+            document.getElementById("view_customer_input").innerText = "Depositor address is " + result[0];
+            document.getElementById("view_amount_input").innerText = "Amount is " + amt + " ETH";
+        }
+
+        async function withdraw(){
+            const accounts = await web3.eth.requestAccounts();
+
+            contract.methods.withdraw().send({
+                from: accounts[0]
+            })
+            .once("receipt", function(receipt){
+
+                const event = receipt.events.Withdraw;
+
+                const owner = event.returnValues.owner;
+                const amt = web3.utils.fromWei(event.returnValues.amount, "ether");
+
+                alert(
+                    "Withdraw Event:\n" +
+                    "Owner: " + owner + "\n" +
+                    "Amount: " + amt + " ETH"
+                );
+
+            })
+            .on("error", function(error){
+                console.error(error);
+            });
         }
         </script>
     </div>
