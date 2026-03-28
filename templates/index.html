@@ -13,18 +13,19 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+    <script src="/static/popup.js"></script>
 
     <script>
         async function registerLogin(){
             const username = document.getElementById("username").value;
 
             if(!username){
-                alert("Username is required");
+                popup("Username is required");
                 return;
             }
 
             if (!window.ethereum) {
-                alert("Please install MetaMask");
+                popup("Please install MetaMask");
                 return;
             }
 
@@ -51,17 +52,17 @@
 
             // Handle response
             if(data.status === "login"){
-                alert(data.message);
+                popup(data.message);
                 sessionStorage.setItem("username", username);
                 window.location.href = "/main";
             }
             else if(data.status === "register"){
-                alert(data.message);
+                popup(data.message);
                 sessionStorage.setItem("username", username);
                 window.location.href = "/main";
             }
             else{
-                alert(data.message);
+                popup(data.message);
             }
         }
     </script>

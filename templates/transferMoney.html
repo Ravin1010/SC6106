@@ -17,6 +17,7 @@
         <p id="view_payee"></p>
         <p id="view_amount"></p>
         <script src ="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+        <script src="/static/popup.js"></script>
         <script>
             const contractAddress = "0x0e3a7C82510A63887d89d48Fe77b992A0bB4cdC8";
             const contractABI = [
@@ -159,7 +160,7 @@
 
             // VALIDATION
             if (payerInput.toLowerCase() !== wallet.toLowerCase()) {
-                alert("Payer address must match your connected wallet");
+                popup("Payer address must match your connected wallet");
                 return;
             }
             const payer = wallet;
@@ -176,8 +177,8 @@
                 const payeeAddr = event.returnValues.payee;
                 const amt = web3.utils.fromWei(event.returnValues.amount, "ether");
 
-                // Alert with event data
-                alert(
+                // Popup with event data
+                popup(
                     "Payment Event:\n" +
                     "Payer: " + payerAddr + "\n" +
                     "Payee: " + payeeAddr + "\n" +
