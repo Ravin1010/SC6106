@@ -184,9 +184,20 @@
                 alert(
                     "Deposit Event:\n" +
                     "User: " + user + "\n" +
-                    "Amount: " + amt + " ETH"
+                    "Amount: " + amt + "ETH"
                 );
 
+                // LOG TRANSACTION
+                fetch("/logTransaction", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({
+                        username: sessionStorage.getItem("username"),
+                        wallet: user,
+                        action: "deposit",
+                        amount: amt
+                    })
+                });
             })
             .on("error", function(error){
                 console.error(error);
@@ -199,7 +210,7 @@
             const amt = web3.utils.fromWei(result[1], "ether");
 
             document.getElementById("view_customer_input").innerText = "Depositor address is " + result[0];
-            document.getElementById("view_amount_input").innerText = "Amount is " + amt + " ETH";
+            document.getElementById("view_amount_input").innerText = "Amount is " + amt + "ETH";
         }
 
         async function withdraw(){
@@ -218,9 +229,20 @@
                 alert(
                     "Withdraw Event:\n" +
                     "Owner: " + owner + "\n" +
-                    "Amount: " + amt + " ETH"
+                    "Amount: " + amt + "ETH"
                 );
 
+                // LOG TRANSACTION
+                fetch("/logTransaction", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({
+                        username: sessionStorage.getItem("username"),
+                        wallet: owner,
+                        action: "withdraw",
+                        amount: amt
+                    })
+                });
             })
             .on("error", function(error){
                 console.error(error);

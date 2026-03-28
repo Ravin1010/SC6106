@@ -173,9 +173,20 @@
                     "Payment Event:\n" +
                     "Payer: " + payerAddr + "\n" +
                     "Payee: " + payeeAddr + "\n" +
-                    "Amount: " + amt + " ETH"
+                    "Amount: " + amt + "ETH"
                 );
 
+                // LOG TRANSACTION
+                fetch("/logTransaction", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({
+                        username: sessionStorage.getItem("username"),
+                        wallet: payerAddr,
+                        action: "transfer",
+                        amount: amt
+                    })
+                });
             })
             .on("error", function(error){
                 console.error(error);
@@ -188,7 +199,7 @@
             document.getElementById("view_payer").innerText = "Payer is "+ result[0];
             document.getElementById("view_payee").innerText = "Payee is "+ result[1];
             const amt = web3.utils.fromWei(result[2], "ether");
-            document.getElementById("view_amount").innerText = "Amount is " + amt + " ETH";
+            document.getElementById("view_amount").innerText = "Amount is " + amt + "ETH";
 
         }
         </script>

@@ -191,6 +191,32 @@ def viewTransactions():
         "transactions": transactions
     })
 
+# LOG TRANSACTION
+@app.route("/logTransaction", methods=["POST"])
+def logTransaction():
+    data = request.json
+
+    username = data.get("username")
+    wallet = data.get("wallet")
+    action = data.get("action")
+    amount = data.get("amount")
+
+    conn = sqlite3.connect('user.db')
+    c = conn.cursor()
+
+    c.execute(
+        'INSERT INTO transactions (username, wallet_address, action, amount) VALUES (?, ?, ?, ?)',
+        (username, wallet, action, amount)
+    )
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "status": "success",
+        "message": "Transaction logged"
+    })
+
 # MUST RUN ON IMPORT (Render + Gunicorn)
 init_db()
 
