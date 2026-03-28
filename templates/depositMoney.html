@@ -167,8 +167,16 @@
         async function deposit(){
             const accounts = await web3.eth.requestAccounts();
 
-            const customer = accounts[0]; // still enforced by contract
+            const wallet = accounts[0];
+            const customerInput = document.getElementById("customer_input").value;
             const amount = document.getElementById("amount_input").value;
+
+            // VALIDATION
+            if (customerInput.toLowerCase() !== wallet.toLowerCase()) {
+                alert("Depositor address must match your connected wallet");
+                return;
+            }
+            const customer = wallet;
 
             contract.methods.deposit_money(customer).send({
                 from: customer,
