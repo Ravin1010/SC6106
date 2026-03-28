@@ -4,10 +4,32 @@ import datetime
 
 app=Flask(__name__)
 
-# CREATE TABLE (PDF first block)
+# CREATE TABLES
 def init_db():
     conn = sqlite3.connect('user.db')
-    conn.execute('CREATE TABLE IF NOT EXISTS user (name text, timestamp timestamp)')
+    c = conn.cursor()
+
+    # Users table
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE,
+            wallet_address TEXT UNIQUE
+        )
+    ''')
+
+    # Transactions table
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS transactions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT,
+            wallet_address TEXT,
+            action TEXT,
+            amount TEXT
+        )
+    ''')
+
+    conn.commit()
     conn.close()
 
 # HOME/INDEX
@@ -15,20 +37,64 @@ def init_db():
 def index():
 	return(render_template("index.html"))
 
+# REGISTER OR LOGIN USER
+@app.route("/registerLoginUser", methods=["POST"])
+def registerLoginUser():
+    data = request.json
+    username = data.get("username")
+    wallet = data.get("wallet")
+
+    conn = sqlite3.connect('user.db')
+    c = conn.cursor()
+
+    # Check if username exists
+    c.execute('SELECT * FROM users WHERE username = ?', (username,))
+    user_by_name = c.fetchone()
+
+    # Check if wallet exists
+    c.execute('SELECT * FROM users WHERE wallet_address = ?', (wallet,))
+    user_by_wallet = c.fetchone()
+
+    # CASE 1: Both exist
+    if user_by_name and user_by_wallet:
+        if user_by_name[2] == wallet:
+            conn.close()
+            return jsonify({
+                "status": "login",
+                "message": "Welcome back"
+            })
+        else:
+            conn.close()
+            return jsonify({
+                "status": "error",
+                "message": "Username or wallet already taken"
+            })
+
+    # CASE 2: One exists (conflict)
+    elif user_by_name or user_by_wallet:
+        conn.close()
+        return jsonify({
+            "status": "error",
+            "message": "Username or wallet already taken"
+        })
+
+    # CASE 3: New user
+    else:
+        c.execute(
+            'INSERT INTO users (username, wallet_address) VALUES (?, ?)',
+            (username, wallet)
+        )
+        conn.commit()
+        conn.close()
+
+        return jsonify({
+            "status": "register",
+            "message": "New user registered"
+        })
+
 # MAIN
 @app.route("/main", methods=["GET", "POST"])
 def main():
-	if request.method == "POST":
-		username = request.form.get("username")
-		if username:
-			t = datetime.datetime.now()
-			conn = sqlite3.connect('user.db')
-			c = conn.cursor()
-			c.execute('INSERT INTO user (name,timestamp) VALUES(?,?)',(username,t))
-			conn.commit()
-			c.close()
-			conn.close()
-
 	return(render_template("main.html"))
 
 # TRANSFER MONEY PAGE
@@ -45,39 +111,6 @@ def depositMoney():
 @app.route("/databaseFunctions", methods=["GET", "POST"])
 def databaseFunctions():
 	return(render_template("databaseFunctions.html"))
-
-# CHECK (TABLE STRUCTURE (print description))
-@app.route("/check")
-def check():
-    conn = sqlite3.connect('user.db')
-    c = conn.cursor()
-    c.execute('select * from user')
-    desc = c.description
-    c.close()
-    conn.close()
-    return jsonify({"result": str(desc)})
-
-# VIEW USERS (SELECT + PRINT USERS (PDF loop))
-@app.route("/viewUsers")
-def viewUsers():
-    conn = sqlite3.connect('user.db')
-    c = conn.cursor()
-    c.execute('select * from user')
-    rows = c.fetchall()
-    c.close()
-    conn.close()
-    return jsonify({"result": rows})
-
-# DELETE USERS
-@app.route("/deleteUsers")
-def deleteUsers():
-    conn = sqlite3.connect('user.db')
-    c = conn.cursor()
-    c.execute('DELETE FROM user')
-    conn.commit()
-    c.close()
-    conn.close()
-    return jsonify({"result": "All users deleted"})
 
 # MUST RUN ON IMPORT (Render + Gunicorn)
 init_db()
