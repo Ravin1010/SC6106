@@ -10,6 +10,9 @@ function popup(msg) {
     p.style.background = "white";
     p.style.padding = "15px";
     p.style.zIndex = "9999";
+    p.style.borderRadius = "8px";
+    p.style.boxShadow = "0 4px 10px rgba(0,0,0,0.2)";
+    p.style.textAlign = "center";
 
     // 🔥 MOBILE FIXES
     p.style.maxWidth = "90%";
