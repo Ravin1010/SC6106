@@ -1,36 +1,83 @@
 <head></head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 <body>
     <div class="container">
         <h2>Database Functions</h2>
         <!-- SQL UI BUTTONS -->
-        <button class="btn" onclick="check()">Check Table Structure (SQL)</button>
-        <button class="btn" onclick="viewUsers()">View Users (SQL)</button>
-        <button class="btn" onclick="deleteUsers()">Delete Users (SQL)</button>
-        <p id="sql_result"></p>
+        <button class="btn" onclick="viewUser()">View User</button>
+        <button class="btn" onclick="deleteUser()">Delete User</button>
+        <button class="btn" onclick="viewTransactions()">View User Transaction History</button>
+
+        <p id="result"></p>
+
         <form action="/main" method="post">
             <input type="submit" value="Main">
         </form>
         <script src ="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
         <script>
-            async function check(){
-                const response = await fetch("/check");
+            const username = sessionStorage.getItem("username");
+
+            async function viewUser(){
+                const response = await fetch("/viewUser", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({ username: username })
+                });
+
                 const data = await response.json();
-                document.getElementById("sql_result").innerText = data.result;
+
+                if(data.status === "success"){
+                    document.getElementById("result").innerText =
+                        "Username: " + data.username + "\nWallet: " + data.wallet;
+                } else {
+                    alert(data.message);
+                }
             }
 
-            async function viewUsers(){
-                const response = await fetch("/viewUsers");
+            async function deleteUser(){
+                const response = await fetch("/deleteUser", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({ username: username })
+                });
+
                 const data = await response.json();
-                document.getElementById("sql_result").innerText = JSON.stringify(data.result);
+
+                alert(data.message);
+
+                if(data.status === "success"){
+                    sessionStorage.removeItem("username");
+                    window.location.href = "/";
+                }
             }
 
-            async function deleteUsers(){
-                const response = await fetch("/deleteUsers");
+            async function viewTransactions(){
+                const response = await fetch("/viewTransactions", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({ username: username })
+                });
+
                 const data = await response.json();
-                document.getElementById("sql_result").innerText = data.result;
+
+                if(data.status === "success"){
+                    if(data.transactions.length === 0){
+                        document.getElementById("result").innerText = "No transactions found";
+                        return;
+                    }
+
+                    let output = "Transaction History:\n";
+
+                    data.transactions.forEach(tx => {
+                        output += tx.action + " " + tx.amount + "ETH\n";
+                    });
+
+                    document.getElementById("result").innerText = output;
+                } else {
+                    alert(data.message);
+                }
             }
-        </script>        
+        </script>
     </div>
 </body>

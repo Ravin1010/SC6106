@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request, redirect, jsonify
 import sqlite3
-import datetime
 
 app=Flask(__name__)
 
@@ -111,6 +110,86 @@ def depositMoney():
 @app.route("/databaseFunctions", methods=["GET", "POST"])
 def databaseFunctions():
 	return(render_template("databaseFunctions.html"))
+
+# VIEW USER
+@app.route("/viewUser", methods=["POST"])
+def viewUser():
+    data = request.json
+    username = data.get("username")
+
+    conn = sqlite3.connect('user.db')
+    c = conn.cursor()
+
+    c.execute('SELECT username, wallet_address FROM users WHERE username = ?', (username,))
+    user = c.fetchone()
+
+    conn.close()
+
+    if user:
+        return jsonify({
+            "status": "success",
+            "username": user[0],
+            "wallet": user[1]
+        })
+    else:
+        return jsonify({
+            "status": "error",
+            "message": "User not found"
+        })
+
+# DELETE USER
+@app.route("/deleteUser", methods=["POST"])
+def deleteUser():
+    data = request.json
+    username = data.get("username")
+
+    conn = sqlite3.connect('user.db')
+    c = conn.cursor()
+
+    c.execute('SELECT * FROM users WHERE username = ?', (username,))
+    user = c.fetchone()
+
+    if not user:
+        conn.close()
+        return jsonify({
+            "status": "error",
+            "message": "User not found"
+        })
+
+    c.execute('DELETE FROM users WHERE username = ?', (username,))
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "status": "success",
+        "message": "User deleted successfully"
+    })
+
+# VIEW TRANSACTIONS
+@app.route("/viewTransactions", methods=["POST"])
+def viewTransactions():
+    data = request.json
+    username = data.get("username")
+
+    conn = sqlite3.connect('user.db')
+    c = conn.cursor()
+
+    c.execute('SELECT action, amount FROM transactions WHERE username = ?', (username,))
+    rows = c.fetchall()
+
+    conn.close()
+
+    transactions = []
+    for row in rows:
+        transactions.append({
+            "action": row[0],
+            "amount": row[1]
+        })
+
+    return jsonify({
+        "status": "success",
+        "transactions": transactions
+    })
 
 # MUST RUN ON IMPORT (Render + Gunicorn)
 init_db()

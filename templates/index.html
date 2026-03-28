@@ -1,14 +1,68 @@
 <head></head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
 <body>
     <div class="container">
         <h2>Welcome to SC6106 Web3 Application</h2>
         <p>Please enter your username</p>
-        <form action="/main" method="post">
-            <input type="text" name="username" placeholder="Enter username">
-            <input type="submit" value="Enter">
-        </form>
-        
+
+        <input type="text" id="username" placeholder="Enter username">
+        <button onclick="registerLogin()">Enter</button>
+
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+
+    <script>
+        async function registerLogin(){
+            const username = document.getElementById("username").value;
+
+            if(!username){
+                alert("Username is required");
+                return;
+            }
+
+            if (!window.ethereum) {
+                alert("Please install MetaMask");
+                return;
+            }
+
+            // Connect wallet
+            const accounts = await window.ethereum.request({
+                method: "eth_requestAccounts"
+            });
+
+            const wallet = accounts[0];
+
+            // Call backend
+            const response = await fetch("/registerLoginUser", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    username: username,
+                    wallet: wallet
+                })
+            });
+
+            const data = await response.json();
+
+            // Handle response
+            if(data.status === "login"){
+                alert(data.message);
+                sessionStorage.setItem("username", username);
+                window.location.href = "/main";
+            }
+            else if(data.status === "register"){
+                alert(data.message);
+                sessionStorage.setItem("username", username);
+                window.location.href = "/main";
+            }
+            else{
+                alert(data.message);
+            }
+        }
+    </script>
 </body>
