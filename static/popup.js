@@ -24,20 +24,4 @@ function popup(msg) {
     p.style.overflowY = "auto";
 
     document.body.appendChild(p);
-
-    // INTERCEPT NAVIGATION
-    let originalHref = window.location.href;
-
-    Object.defineProperty(window, "location", {
-        value: {
-            set href(url) {
-                // delay redirect until OK
-                document.getElementById("popupBtn").onclick = function() {
-                    p.remove();
-                    window.location.replace(url);
-                };
-            }
-        },
-        configurable: true
-    });
 }
