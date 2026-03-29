@@ -25,21 +25,19 @@ function popup(msg) {
 
     document.body.appendChild(p);
 
-    // DELAY NAVIGATION GLOBALLY
-    const originalAssign = window.location.assign;
-    const originalReplace = window.location.replace;
+    // INTERCEPT NAVIGATION
+    let originalHref = window.location.href;
 
-    window.location.assign = function(url) {
-        document.getElementById("popupBtn").onclick = function() {
-            p.remove();
-            originalAssign.call(window.location, url);
-        };
-    };
-
-    window.location.replace = function(url) {
-        document.getElementById("popupBtn").onclick = function() {
-            p.remove();
-            originalReplace.call(window.location, url);
-        };
-    };
+    Object.defineProperty(window, "location", {
+        value: {
+            set href(url) {
+                // delay redirect until OK
+                document.getElementById("popupBtn").onclick = function() {
+                    p.remove();
+                    window.location.replace(url);
+                };
+            }
+        },
+        configurable: true
+    });
 }
