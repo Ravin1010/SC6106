@@ -53,19 +53,13 @@
             // Handle response
             if(data.status === "login"){
                 popup(data.message);
-
-                setTimeout(() => {
-                    sessionStorage.setItem("username", username);
-                    window.location.href = "/main";
-                }, 5000);
+                sessionStorage.setItem("username", username);
+                window.location.href = "/main";
             }
             else if(data.status === "register"){
                 popup(data.message);
-
-                setTimeout(() => {
-                    sessionStorage.setItem("username", username);
-                    window.location.href = "/main";
-                }, 5000);
+                sessionStorage.setItem("username", username);
+                window.location.href = "/main";
             }
             else{
                 popup(data.message);
