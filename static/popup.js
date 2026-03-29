@@ -1,7 +1,7 @@
 function popup(msg) {
     const p = document.createElement("div");
 
-    p.innerHTML = msg + "<br><br><button onclick='this.parentElement.remove()'>OK</button>";
+    p.innerHTML = msg + "<br><br><button id='popupBtn'>OK</button>";
 
     p.style.position = "fixed";
     p.style.top = "50%";
@@ -24,4 +24,22 @@ function popup(msg) {
     p.style.overflowY = "auto";
 
     document.body.appendChild(p);
+
+    // DELAY NAVIGATION GLOBALLY
+    const originalAssign = window.location.assign;
+    const originalReplace = window.location.replace;
+
+    window.location.assign = function(url) {
+        document.getElementById("popupBtn").onclick = function() {
+            p.remove();
+            originalAssign.call(window.location, url);
+        };
+    };
+
+    window.location.replace = function(url) {
+        document.getElementById("popupBtn").onclick = function() {
+            p.remove();
+            originalReplace.call(window.location, url);
+        };
+    };
 }
