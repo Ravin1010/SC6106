@@ -1,7 +1,7 @@
 function popup(msg) {
     const p = document.createElement("div");
 
-    p.innerHTML = msg + "<br><br><button id='popupBtn'>OK</button>";
+    p.innerHTML = msg + "<br><br><button onclick='this.parentElement.remove()'>OK</button>";
 
     p.style.position = "fixed";
     p.style.top = "50%";
